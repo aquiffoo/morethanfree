@@ -1,4 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const currentPath = window.location.pathname;
+
+  // Verifica se estamos na página inicial
+  if (currentPath === '/' || currentPath === '/index.html') {
+    // Não faz nada, deixa a página inicial carregar normalmente
+    return;
+  }
+
+  // Verifica se estamos na página de login ou registro
+  if (currentPath === '/login.html' || currentPath === '/register.html') {
+    // Se o usuário já estiver logado, redireciona para o console
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+      window.location.href = 'console.html';
+      return;
+    }
+  }
+
+  // Para todas as outras páginas (como o console), verifica se o usuário está logado
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser && currentPath !== '/login.html' && currentPath !== '/register.html') {
+    window.location.href = 'login.html';
+    return;
+  }
+
   // Código para ScrollReveal e menu flutuante
   if (typeof ScrollReveal !== 'undefined') {
     ScrollReveal().reveal('header', { 
@@ -33,12 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Código para a página de console
   const consoleSection = document.querySelector('main');
   if (consoleSection) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      window.location.href = 'login.html';
-      return;
-    }
-
     const userEmailElement = document.getElementById('userEmail');
     const accountCreatedElement = document.getElementById('accountCreated');
     const lastLoginElement = document.getElementById('lastLogin');
@@ -236,7 +255,7 @@ function generateResponse(model, prompt) {
 
   const randomIndex = Math.floor(Math.random() * 10);
   return `<p><strong>Model:</strong> ${model}</p><p><strong>Response:</strong> ${responses[model][randomIndex]}</p>`;
-}
+});
 
 function countTokens(text) {
   return text.split(/\s+/).length;
