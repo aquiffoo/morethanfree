@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console - morethan.free</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="floating-menu">
+    <ul>
+      <li><a href="#account-info">Account</a></li>
+      <li><a href="#api-key">API Key</a></li>
+      <li><a href="#playground">Playground</a></li>
+      <li><a href="#depositer">Depositer</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section id="account-info">
+      <h2>Account Information</h2>
+      <div class="account-container">
+        <p>Email: <span id="userEmail"></span></p>
+        <p>Account created: <span id="accountCreated"></span></p>
+        <p>Last login: <span id="lastLogin"></span></p>
+      </div>
+    </section>
+
+    <section id="api-key">
+      <h2>Your API Key</h2>
+      <div class="api-key-container">
+        <pre id="apiKey"></pre>
+        <button id="copyApiKey" class="button">Copy</button>
+      </div>
+    </section>
+
+    <section id="playground">
+      <h2>AI Playground</h2>
+      <form id="playgroundForm">
+        <select id="modelSelect">
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="openai-o1">OpenAI o1</option>
+          <option value="flux-1">Flux.1</option>
+          <option value="claude-3.5">Claude 3.5</option>
+          <option value="gemini-1.5">Gemini 1.5</option>
+          <option value="llama-3.1">Llama 3.1</option>
+          <option value="this-1">this-1</option>
+          <option value="loremipsum-ai">loremipsum.ai</option>
+        </select>
+        <textarea id="prompt" rows="4" placeholder="Enter your prompt here"></textarea>
+        <button type="submit" class="button">Generate</button>
+      </form>
+      <div id="result" class="result-container"></div>
+    </section>
+
+    <section id="depositer">
+      <h2>Your Earnings</h2>
+      <div class="earnings-container">
+        <p>Current balance: $<span id="balance">0.00</span></p>
+        <p>Tokens processed: <span id="tokensProcessed">0</span></p>
+        <p>Images processed: <span id="imagesProcessed">0</span></p>
+      </div>
+    </section>
+
+    <button id="logout" class="button">Logout</button>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
