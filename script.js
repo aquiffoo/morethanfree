@@ -1,15 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
   const currentPath = window.location.pathname;
 
-  // Verifica se estamos na página inicial
-  if (currentPath === '/' || currentPath === '/index.html') {
-    // Não faz nada, deixa a página inicial carregar normalmente
-    return;
+  function redirectToConsole() {
+    window.location.href = '/console.html';
   }
 
-  // Verifica se estamos na página de login ou registro
+  function redirectToLogin() {
+    window.location.href = '/login.html';
+  }
+
+  if (currentPath === '/' || currentPath === '/index.html') {
+    return;
+  } else if (currentPath === '/login.html' || currentPath === '/register.html') {
+    if (currentUser) {
+      redirectToConsole();
+    }
+  } else if (currentPath === '/console.html') {
+    if (!currentUser) {
+      redirectToLogin();
+    } else {
+      document.getElementById('userEmail').textContent = currentUser.email;
+      document.getElementById('accountCreated').textContent = new Date(currentUser.createdAt).toLocaleString();
+      document.getElementById('lastLogin').textContent = new Date(currentUser.lastLogin).toLocaleString();
+      document.getElementById('apiKey').textContent = currentUser.apiKey;
+    }
+  }
+
   if (currentPath === '/login.html' || currentPath === '/register.html') {
-    // Se o usuário já estiver logado, redireciona para o console
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser) {
       window.location.href = 'console.html';
@@ -17,14 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Para todas as outras páginas (como o console), verifica se o usuário está logado
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (!currentUser && currentPath !== '/login.html' && currentPath !== '/register.html') {
     window.location.href = 'login.html';
     return;
   }
 
-  // Código para ScrollReveal e menu flutuante
   if (typeof ScrollReveal !== 'undefined') {
     ScrollReveal().reveal('header', { 
       delay: 200,
@@ -55,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Código para a página de console
   const consoleSection = document.querySelector('main');
   if (consoleSection) {
     const userEmailElement = document.getElementById('userEmail');
@@ -69,15 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const tokensProcessedElement = document.getElementById('tokensProcessed');
     const imagesProcessedElement = document.getElementById('imagesProcessed');
 
-    // Preencher informações da conta
     userEmailElement.textContent = currentUser.email;
     accountCreatedElement.textContent = new Date(currentUser.createdAt).toLocaleString();
     lastLoginElement.textContent = new Date(currentUser.lastLogin).toLocaleString();
 
-    // Exibir a chave da API
     apiKeyElement.textContent = currentUser.apiKey;
 
-    // Inicializar ou carregar os dados do usuário
     let userData = JSON.parse(localStorage.getItem('userData')) || {
       balance: 0,
       tokensProcessed: 0,
@@ -129,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('userData', JSON.stringify(userData));
     }
 
-    // Adicionar funcionalidade para copiar a chave da API
     const copyApiKeyButton = document.getElementById('copyApiKey');
     copyApiKeyButton.addEventListener('click', () => {
       navigator.clipboard.writeText(currentUser.apiKey).then(() => {
@@ -139,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Atualizar o último login
     currentUser.lastLogin = new Date().toISOString();
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
   }
@@ -255,7 +264,7 @@ function generateResponse(model, prompt) {
 
   const randomIndex = Math.floor(Math.random() * 10);
   return `<p><strong>Model:</strong> ${model}</p><p><strong>Response:</strong> ${responses[model][randomIndex]}</p>`;
-});
+}
 
 function countTokens(text) {
   return text.split(/\s+/).length;
