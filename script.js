@@ -9,148 +9,179 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = '/login.html';
   }
 
-  if (currentPath === '/' || currentPath === '/index.html') {
-    return;
-  } else if (currentPath === '/login.html' || currentPath === '/register.html') {
-    if (currentUser) {
-      redirectToConsole();
-    }
-  } else if (currentPath === '/console.html') {
-    if (!currentUser) {
-      redirectToLogin();
-    } else {
-      document.getElementById('userEmail').textContent = currentUser.email;
-      document.getElementById('accountCreated').textContent = new Date(currentUser.createdAt).toLocaleString();
-      document.getElementById('lastLogin').textContent = new Date(currentUser.lastLogin).toLocaleString();
-      document.getElementById('apiKey').textContent = currentUser.apiKey;
-    }
+  function isLoggedIn() {
+    return localStorage.getItem('currentUser') !== null;
   }
 
-  if (currentPath === '/login.html' || currentPath === '/register.html') {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-      window.location.href = 'console.html';
+  // Lógica para a página inicial (index.html)
+  if (currentPath === '/' || currentPath.includes('index.html')) {
+    // Implementa ScrollReveal e menu flutuante
+    if (typeof ScrollReveal !== 'undefined') {
+      ScrollReveal().reveal('header', { 
+        delay: 200,
+        distance: '50px',
+        origin: 'top'
+      });
+      
+      ScrollReveal().reveal('#offer', { 
+        delay: 400,
+        distance: '50px',
+        origin: 'left'
+      });
+      
+      ScrollReveal().reveal('#cta', { 
+        delay: 600,
+        distance: '50px',
+        origin: 'right'
+      });
+    }
+
+    document.querySelectorAll('.floating-menu a').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+    return;
+  }
+
+  // Lógica para a página de login
+  if (currentPath.includes('login.html')) {
+    if (isLoggedIn()) {
+      redirectToConsole();
       return;
     }
-  }
 
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser && currentPath !== '/login.html' && currentPath !== '/register.html') {
-    window.location.href = 'login.html';
-    return;
-  }
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-  if (typeof ScrollReveal !== 'undefined') {
-    ScrollReveal().reveal('header', { 
-      delay: 200,
-      distance: '50px',
-      origin: 'top'
-    });
-    
-    ScrollReveal().reveal('#offer', { 
-      delay: 400,
-      distance: '50px',
-      origin: 'left'
-    });
-    
-    ScrollReveal().reveal('#cta', { 
-      delay: 600,
-      distance: '50px',
-      origin: 'right'
-    });
-  }
+        // Simula login bem-sucedido
+        const user = {
+          email: email,
+          apiKey: generateApiKey(),
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        };
 
-  document.querySelectorAll('.floating-menu a').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        redirectToConsole();
       });
-    });
-  });
+    }
+  }
 
-  const consoleSection = document.querySelector('main');
-  if (consoleSection) {
-    const userEmailElement = document.getElementById('userEmail');
-    const accountCreatedElement = document.getElementById('accountCreated');
-    const lastLoginElement = document.getElementById('lastLogin');
-    const apiKeyElement = document.getElementById('apiKey');
-    const logoutButton = document.getElementById('logout');
-    const playgroundForm = document.getElementById('playgroundForm');
-    const resultDiv = document.getElementById('result');
-    const balanceElement = document.getElementById('balance');
-    const tokensProcessedElement = document.getElementById('tokensProcessed');
-    const imagesProcessedElement = document.getElementById('imagesProcessed');
+  // Lógica para a página de registro
+  if (currentPath.includes('register.html')) {
+    if (isLoggedIn()) {
+      redirectToConsole();
+      return;
+    }
 
-    userEmailElement.textContent = currentUser.email;
-    accountCreatedElement.textContent = new Date(currentUser.createdAt).toLocaleString();
-    lastLoginElement.textContent = new Date(currentUser.lastLogin).toLocaleString();
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+      registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Implementar lógica de registro aqui
+        redirectToLogin();
+      });
+    }
+  }
 
-    apiKeyElement.textContent = currentUser.apiKey;
+  // Lógica para a página do console
+  if (currentPath.includes('console.html')) {
+    if (!isLoggedIn()) {
+      redirectToLogin();
+      return;
+    }
 
-    let userData = JSON.parse(localStorage.getItem('userData')) || {
-      balance: 0,
-      tokensProcessed: 0,
-      imagesProcessed: 0
-    };
+    const consoleSection = document.querySelector('main');
+    if (consoleSection) {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      const userEmailElement = document.getElementById('userEmail');
+      const accountCreatedElement = document.getElementById('accountCreated');
+      const lastLoginElement = document.getElementById('lastLogin');
+      const apiKeyElement = document.getElementById('apiKey');
+      const logoutButton = document.getElementById('logout');
+      const playgroundForm = document.getElementById('playgroundForm');
+      const resultDiv = document.getElementById('result');
+      const balanceElement = document.getElementById('balance');
+      const tokensProcessedElement = document.getElementById('tokensProcessed');
+      const imagesProcessedElement = document.getElementById('imagesProcessed');
 
-    updateDepositer();
+      userEmailElement.textContent = currentUser.email;
+      accountCreatedElement.textContent = new Date(currentUser.createdAt).toLocaleString();
+      lastLoginElement.textContent = new Date(currentUser.lastLogin).toLocaleString();
+      apiKeyElement.textContent = currentUser.apiKey;
 
-    logoutButton.addEventListener('click', () => {
-      localStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
-    });
-
-    playgroundForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const model = document.getElementById('modelSelect').value;
-      const prompt = document.getElementById('prompt').value;
-
-      const response = generateResponse(model, prompt);
-      resultDiv.innerHTML = response;
-
-      const inputTokens = countTokens(prompt);
-      const outputTokens = countTokens(response);
-      const totalTokens = inputTokens + outputTokens;
-
-      userData.tokensProcessed += totalTokens;
-
-      if (model === 'flux-1') {
-        userData.imagesProcessed += 1;
-      }
-
-      const tokenEarnings = (totalTokens / 1000000);
-      const imageEarnings = (model === 'flux-1') ? 0.01 : 0;
-      const totalEarnings = tokenEarnings + imageEarnings;
-
-      userData.balance += totalEarnings;
+      let userData = JSON.parse(localStorage.getItem('userData')) || {
+        balance: 0,
+        tokensProcessed: 0,
+        imagesProcessed: 0
+      };
 
       updateDepositer();
-      saveUserData();
-    });
 
-    function updateDepositer() {
-      balanceElement.textContent = userData.balance.toFixed(2);
-      tokensProcessedElement.textContent = userData.tokensProcessed.toLocaleString();
-      imagesProcessedElement.textContent = userData.imagesProcessed.toLocaleString();
-    }
-
-    function saveUserData() {
-      localStorage.setItem('userData', JSON.stringify(userData));
-    }
-
-    const copyApiKeyButton = document.getElementById('copyApiKey');
-    copyApiKeyButton.addEventListener('click', () => {
-      navigator.clipboard.writeText(currentUser.apiKey).then(() => {
-        alert('API Key copied to clipboard!');
-      }, (err) => {
-        console.error('Could not copy text: ', err);
+      logoutButton.addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        window.location.href = '/index.html'; // Redireciona para a página inicial após logout
       });
-    });
 
-    currentUser.lastLogin = new Date().toISOString();
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      playgroundForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const model = document.getElementById('modelSelect').value;
+        const prompt = document.getElementById('prompt').value;
+
+        const response = generateResponse(model, prompt);
+        resultDiv.innerHTML = response;
+
+        const inputTokens = countTokens(prompt);
+        const outputTokens = countTokens(response);
+        const totalTokens = inputTokens + outputTokens;
+
+        userData.tokensProcessed += totalTokens;
+
+        if (model === 'flux-1') {
+          userData.imagesProcessed += 1;
+        }
+
+        const tokenEarnings = (totalTokens / 1000000);
+        const imageEarnings = (model === 'flux-1') ? 0.01 : 0;
+        const totalEarnings = tokenEarnings + imageEarnings;
+
+        userData.balance += totalEarnings;
+
+        updateDepositer();
+        saveUserData();
+      });
+
+      function updateDepositer() {
+        balanceElement.textContent = userData.balance.toFixed(2);
+        tokensProcessedElement.textContent = userData.tokensProcessed.toLocaleString();
+        imagesProcessedElement.textContent = userData.imagesProcessed.toLocaleString();
+      }
+
+      function saveUserData() {
+        localStorage.setItem('userData', JSON.stringify(userData));
+      }
+
+      const copyApiKeyButton = document.getElementById('copyApiKey');
+      copyApiKeyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(currentUser.apiKey).then(() => {
+          alert('API Key copied to clipboard!');
+        }, (err) => {
+          console.error('Could not copy text: ', err);
+        });
+      });
+
+      currentUser.lastLogin = new Date().toISOString();
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
   }
 });
 
@@ -165,28 +196,28 @@ function generateApiKey() {
 function generateResponse(model, prompt) {
   const responses = {
     'gpt-4o': [
-      "As an advanced language model, I can provide detailed and nuanced responses to complex queries.",
-      "The intricacies of your question require a multifaceted approach to fully address all aspects.",
-      "Let's break down this topic into its core components for a comprehensive analysis.",
-      "From a broader perspective, we can examine various factors influencing this situation.",
-      "Considering the latest research in this field, several key points emerge for discussion.",
-      "To answer your question effectively, we need to consider historical context and current trends.",
-      "This is a fascinating area of study with numerous implications for future developments.",
-      "By synthesizing information from multiple sources, we can gain a clearer understanding.",
-      "The complexity of this issue calls for a careful examination of competing viewpoints.",
-      "In light of recent advancements, we can approach this topic from a new angle."
+      "As an AI language model, I'm here to assist you with any questions or tasks you may have.",
+      "I'm processing your request and formulating a comprehensive response...",
+      "Based on my training data, I can provide insights on a wide range of topics.",
+      "Let me analyze your query and generate the most relevant answer...",
+      "I'm here to help you with information, analysis, or creative tasks. What can I do for you?",
+      "As a large language model, I can assist with various topics. How may I help you today?",
+      "I'm designed to provide helpful and informative responses. What would you like to know?",
+      "Your question is intriguing. Let me process it and offer the best possible answer.",
+      "I'm here to assist you with any information or task you need help with.",
+      "As an AI, I'm constantly learning. Let's explore your query together."
     ],
     'openai-o1': [
-      "Analyzing the given input to provide an optimized response...",
+      "Analyzing your input to generate the most accurate and helpful response...",
+      "Processing query through advanced language models for optimal results...",
+      "Utilizing deep learning algorithms to formulate a comprehensive answer...",
+      "Accessing vast knowledge base to provide you with the most relevant information...",
+      "Employing natural language processing to understand and respond to your request...",
       "Calculating the most efficient solution based on available data...",
       "Optimizing language processing for maximum clarity and concision...",
       "Implementing advanced algorithms to generate the most relevant answer...",
       "Utilizing deep learning techniques to enhance response quality...",
-      "Applying natural language processing to interpret and respond accurately...",
-      "Leveraging vast knowledge base to formulate a comprehensive reply...",
-      "Executing optimized language models to generate a tailored response...",
-      "Processing input through multiple layers of neural networks for precision...",
-      "Employing state-of-the-art AI to provide an insightful answer..."
+      "Applying natural language processing to interpret and respond accurately..."
     ],
     'flux-1': [
       '<img src="https://picsum.photos/300/200?random=1" alt="Generated Image">',
